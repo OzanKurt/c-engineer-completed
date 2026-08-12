@@ -37,14 +37,17 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.NpcLootReceived;
+import net.runelite.client.events.PlayerLootReceived;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
 import net.runelite.client.util.Text;
+import net.runelite.client.util.WildcardMatcher;
 
 import javax.inject.Inject;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -472,6 +475,48 @@ public class AnnouncementTriggers {
                 soundEngine.playClip(Sound.BRIMSTONE_KEY, executor);
             }
         }
+
+        checkLootForValuableDrop(loot);
+    }
+
+    @Subscribe
+    public void onPlayerLootReceived(PlayerLootReceived playerLootReceived) {
+        checkLootForValuableDrop(playerLootReceived.getItems());
+    }
+
+    private void checkLootForValuableDrop(Collection<ItemStack> loot) {
+        if (!config.announceValuableDrops())
+            return;
+
+        List<String> alwaysValuableItems = Text.fromCSV(config.valuableDropItems());
+        int threshold = config.valuableDropThreshold();
+
+        long totalValue = 0;
+        boolean matchedAlwaysValuableItem = false;
+        for (ItemStack itemStack : loot) {
+            totalValue += (long) itemManager.getItemPrice(itemStack.getId()) * itemStack.getQuantity();
+
+            if (!matchedAlwaysValuableItem && matchesAlwaysValuableItem(itemStack.getId(), alwaysValuableItems))
+                matchedAlwaysValuableItem = true;
+        }
+
+        // A threshold of zero means the player only wants the items they listed, rather than every last bone and feather
+        if (matchedAlwaysValuableItem || (threshold > 0 && totalValue >= threshold)) {
+            cEngineer.sendChatIfEnabled("Valuable drop: completed.");
+            soundEngine.playClip(Sound.VALUABLE_DROP, executor);
+        }
+    }
+
+    private boolean matchesAlwaysValuableItem(int itemId, List<String> alwaysValuableItems) {
+        if (alwaysValuableItems.isEmpty())
+            return false;
+
+        String itemName = itemManager.getItemComposition(itemId).getName();
+        for (String itemNamePattern : alwaysValuableItems) {
+            if (WildcardMatcher.matches(itemNamePattern, itemName))
+                return true;
+        }
+        return false;
     }
 
     @Subscribe

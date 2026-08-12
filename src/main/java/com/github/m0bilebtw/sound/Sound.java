@@ -19,6 +19,7 @@ public enum Sound {
     GRUBBY_KEY("grubby_key_r1.wav"),
     LARRANS_KEY("larrans_key_r1.wav"),
     BRIMSTONE_KEY("brimstone_key_r1.wav"),
+    VALUABLE_DROP("valuable_drop_r1.wav"),
     BARROWS_NEVER_LUCKY("barrows_never_lucky_r1.wav"),
     SUPERIOR_FOE("superior_foe_r1.wav"),
     RAID_UNIQUE_FOR_SOMEONE_ELSE("purple_not_for_me_r1.wav"),

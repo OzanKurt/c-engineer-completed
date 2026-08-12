@@ -269,6 +269,43 @@ public interface CEngineerCompletedConfig extends Config {
         return true;
     }
 
+    @ConfigItem(
+            keyName = "announceValuableDrops",
+            name = "Announce Valuable Drops",
+            description = "Should C Engineer announce when a kill drops loot worth more than the value below, or an item matching the list below?",
+            section = SECTION_NON_ACHIEVEMENT_ANNOUNCEMENTS,
+            position = 31
+    )
+    default boolean announceValuableDrops() {
+        return true;
+    }
+
+    @Range(
+            min = 0,
+            max = Integer.MAX_VALUE
+    )
+    @ConfigItem(
+            keyName = "valuableDropThreshold",
+            name = "Valuable drop value (gp)",
+            description = "How much the whole drop has to be worth (Grand Exchange price) before it is announced. Set to 0 to only announce the items listed below.",
+            section = SECTION_NON_ACHIEVEMENT_ANNOUNCEMENTS,
+            position = 32
+    )
+    default int valuableDropThreshold() {
+        return 1_000_000;
+    }
+
+    @ConfigItem(
+            keyName = "valuableDropItems",
+            name = "Always valuable items",
+            description = "Comma separated item names that are always announced no matter what they are worth, which is handy for untradeables. Wildcards (*) are supported, e.g. \"vestige, *ancient icon\"",
+            section = SECTION_NON_ACHIEVEMENT_ANNOUNCEMENTS,
+            position = 33
+    )
+    default String valuableDropItems() {
+        return "";
+    }
+
     @ConfigSection(
             name = "General Announcement Settings",
             description = "Settings for other details when achievement sounds play.",
