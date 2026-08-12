@@ -236,6 +236,17 @@ public interface CEngineerCompletedConfig extends Config {
         return true;
     }
 
+    @ConfigItem(
+            keyName = "announceSuperiorFoe",
+            name = "Announce Superior Foe",
+            description = "Should C Engineer announce when a superior slayer foe appears?",
+            section = SECTION_NON_ACHIEVEMENT_ANNOUNCEMENTS,
+            position = 28
+    )
+    default boolean announceSuperiorFoe() {
+        return true;
+    }
+
     @ConfigSection(
             name = "General Announcement Settings",
             description = "Settings for other details when achievement sounds play.",

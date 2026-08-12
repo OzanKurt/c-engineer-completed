@@ -19,6 +19,7 @@ public enum Sound {
     GRUBBY_KEY("grubby_key_r1.wav"),
     LARRANS_KEY("larrans_key_r1.wav"),
     BRIMSTONE_KEY("brimstone_key_r1.wav"),
+    SUPERIOR_FOE("superior_foe_r1.wav"),
     DEATH("DyingHCIMCompleted_r1.wav"),
     DEATH_TO_C_ENGINEER("Sit_r1.wav"),
 

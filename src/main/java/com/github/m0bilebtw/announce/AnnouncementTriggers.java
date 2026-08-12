@@ -58,6 +58,7 @@ public class AnnouncementTriggers {
     private static final String HUNTER_RUMOUR_FULL_INV_MESSAGE = Text.standardize("You find a rare piece of the creature! Though without space in your inventory, it drops to the ground.");
     private static final String HUNTER_RUMOUR_FULL_INV_DISCARDED_MESSAGE = Text.standardize("You have found a rare piece of the creature! You then discard it as you had no inventory space to pick it up.");
     private static final String FARMING_CONTRACT_MESSAGE = Text.standardize("You've completed a Farming Guild Contract. You should return to Guildmaster Jane.");
+    private static final String SUPERIOR_FOE_MESSAGE = Text.standardize("A superior foe has appeared...");
 
     private static final Random random = new Random();
 
@@ -331,6 +332,10 @@ public class AnnouncementTriggers {
         } else if (config.announceFarmingContracts() && FARMING_CONTRACT_MESSAGE.equals(standardizedMessage)) {
             cEngineer.sendChatIfEnabled("Farming Contract: completed.");
             soundEngine.playClip(Sound.FARMING_CONTRACT, executor);
+
+        } else if (config.announceSuperiorFoe() && SUPERIOR_FOE_MESSAGE.equals(standardizedMessage)) {
+            cEngineer.sendChatIfEnabled("Superior foe: appeared.");
+            soundEngine.playClip(Sound.SUPERIOR_FOE, executor);
         }
     }
 
