@@ -225,6 +225,17 @@ public interface CEngineerCompletedConfig extends Config {
         return true;
     }
 
+    @ConfigItem(
+            keyName = "announceShootingStarLayerMined",
+            name = "Announce Shooting Star Layer Mined",
+            description = "Should C Engineer announce when the crashed star you are at is mined down to its next layer?",
+            section = SECTION_NON_ACHIEVEMENT_ANNOUNCEMENTS,
+            position = 27
+    )
+    default boolean announceShootingStarLayerMined() {
+        return true;
+    }
+
     @ConfigSection(
             name = "General Announcement Settings",
             description = "Settings for other details when achievement sounds play.",

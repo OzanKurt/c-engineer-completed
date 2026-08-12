@@ -24,6 +24,7 @@ public enum Sound {
 
     QOL_NON_PARCH_INFERNAL("Parched_Infernal_r1.wav"),
     QOL_GEM_CRAB_MOVED("gem_crab_moved_r1.wav"),
+    QOL_SHOOTING_STAR_LAYER_MINED("shooting_star_layer_r1.wav"),
 
     EASTER_EGG_STAIRCASE("Staircase_r1.wav"),
     EASTER_EGG_STRAYDOG_BONE("ILoveYou_r2.wav"),
