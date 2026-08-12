@@ -247,6 +247,17 @@ public interface CEngineerCompletedConfig extends Config {
         return true;
     }
 
+    @ConfigItem(
+            keyName = "announceBarrowsNeverLucky",
+            name = "Announce Barrows Chest Without A Unique",
+            description = "Should C Engineer sympathise when you open a Barrows chest that has no brother's equipment in it?",
+            section = SECTION_NON_ACHIEVEMENT_ANNOUNCEMENTS,
+            position = 29
+    )
+    default boolean announceBarrowsNeverLucky() {
+        return true;
+    }
+
     @ConfigSection(
             name = "General Announcement Settings",
             description = "Settings for other details when achievement sounds play.",

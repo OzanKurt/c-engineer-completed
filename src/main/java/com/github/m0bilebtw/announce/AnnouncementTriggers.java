@@ -12,6 +12,8 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.Experience;
 import net.runelite.api.GameState;
+import net.runelite.api.Item;
+import net.runelite.api.ItemContainer;
 import net.runelite.api.Skill;
 import net.runelite.api.annotations.Varbit;
 import net.runelite.api.events.ActorDeath;
@@ -22,6 +24,7 @@ import net.runelite.api.events.StatChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.callback.ClientThread;
@@ -33,6 +36,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.NpcLootReceived;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
 import net.runelite.client.util.Text;
 
@@ -59,6 +63,13 @@ public class AnnouncementTriggers {
     private static final String HUNTER_RUMOUR_FULL_INV_DISCARDED_MESSAGE = Text.standardize("You have found a rare piece of the creature! You then discard it as you had no inventory space to pick it up.");
     private static final String FARMING_CONTRACT_MESSAGE = Text.standardize("You've completed a Farming Guild Contract. You should return to Guildmaster Jane.");
     private static final String SUPERIOR_FOE_MESSAGE = Text.standardize("A superior foe has appeared...");
+
+    private static final Set<String> BARROWS_BROTHER_ITEM_NAME_PREFIXES = Set.of(
+            "Ahrim's", "Dharok's", "Guthan's", "Karil's", "Torag's", "Verac's"
+    );
+
+    // Barrows shares its reward container with clue caskets, so it is only ever read while the Barrows reward is open
+    private static final int BARROWS_REWARD_INVENTORY = InventoryID.TRAIL_REWARDINV;
 
     private static final Random random = new Random();
 
@@ -99,6 +110,9 @@ public class AnnouncementTriggers {
 
     @Inject
     private ConfigManager configManager;
+
+    @Inject
+    private ItemManager itemManager;
 
     @Inject
     private SoundEngine soundEngine;
@@ -345,6 +359,40 @@ public class AnnouncementTriggers {
             delayedCoXColLogAnnouncementPending = false;
             announceColLog();
         }
+
+        if (widgetLoaded.getGroupId() == InterfaceID.BARROWS_REWARD) {
+            checkBarrowsRewardForBrothersEquipment();
+        }
+    }
+
+    private void checkBarrowsRewardForBrothersEquipment() {
+        if (!config.announceBarrowsNeverLucky())
+            return;
+
+        ItemContainer rewards = client.getItemContainer(BARROWS_REWARD_INVENTORY);
+        if (rewards == null)
+            return;
+
+        Item[] items = rewards.getItems();
+        if (items.length == 0)
+            return;
+
+        for (Item item : items) {
+            if (isBarrowsBrothersEquipment(item.getId()))
+                return;
+        }
+
+        cEngineer.sendChatIfEnabled("Never lucky.");
+        soundEngine.playClip(Sound.BARROWS_NEVER_LUCKY, executor);
+    }
+
+    private boolean isBarrowsBrothersEquipment(int itemId) {
+        String itemName = itemManager.getItemComposition(itemId).getName();
+        for (String prefix : BARROWS_BROTHER_ITEM_NAME_PREFIXES) {
+            if (itemName.startsWith(prefix))
+                return true;
+        }
+        return false;
     }
 
     private void announceColLog() {
