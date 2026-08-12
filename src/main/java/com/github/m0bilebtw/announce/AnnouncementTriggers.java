@@ -14,6 +14,7 @@ import net.runelite.api.Experience;
 import net.runelite.api.GameState;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
+import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.api.annotations.Varbit;
 import net.runelite.api.events.ActorDeath;
@@ -48,6 +49,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -63,6 +65,12 @@ public class AnnouncementTriggers {
     private static final String HUNTER_RUMOUR_FULL_INV_DISCARDED_MESSAGE = Text.standardize("You have found a rare piece of the creature! You then discard it as you had no inventory space to pick it up.");
     private static final String FARMING_CONTRACT_MESSAGE = Text.standardize("You've completed a Farming Guild Contract. You should return to Guildmaster Jane.");
     private static final String SUPERIOR_FOE_MESSAGE = Text.standardize("A superior foe has appeared...");
+
+    // Each raid announces its uniques in its own format. A display name is at most 12 characters of letters, digits,
+    // spaces, hyphens and underscores, which is what keeps the loose Chambers of Xeric format from matching everything.
+    private static final Pattern COX_UNIQUE_REGEX = Pattern.compile("^([\\w -]{1,12}) - (.+)$");
+    private static final Pattern TOB_UNIQUE_REGEX = Pattern.compile("^([\\w -]{1,12}) found something special: (.+)$");
+    private static final Pattern TOA_UNIQUE_REGEX = Pattern.compile("^Loot recipient: ([\\w -]{1,12}) - (.+)$");
 
     private static final Set<String> BARROWS_BROTHER_ITEM_NAME_PREFIXES = Set.of(
             "Ahrim's", "Dharok's", "Guthan's", "Karil's", "Torag's", "Verac's"
@@ -295,6 +303,9 @@ public class AnnouncementTriggers {
 
     @Subscribe
     public void onChatMessage(ChatMessage chatMessage) {
+        if (announceIfRaidUniqueWentToSomeoneElse(chatMessage))
+            return;
+
         if (chatMessage.getType() != ChatMessageType.GAMEMESSAGE && chatMessage.getType() != ChatMessageType.SPAM)
             return;
 
@@ -351,6 +362,48 @@ public class AnnouncementTriggers {
             cEngineer.sendChatIfEnabled("Superior foe: appeared.");
             soundEngine.playClip(Sound.SUPERIOR_FOE, executor);
         }
+    }
+
+    /**
+     * @return true if this message was a raid unique announcement, whoever it went to, so that it is not also run
+     * through the regular announcement checks.
+     */
+    private boolean announceIfRaidUniqueWentToSomeoneElse(ChatMessage chatMessage) {
+        ChatMessageType type = chatMessage.getType();
+        if (type != ChatMessageType.GAMEMESSAGE && type != ChatMessageType.FRIENDSCHATNOTIFICATION && type != ChatMessageType.CLAN_MESSAGE)
+            return false;
+
+        String message = Text.removeTags(chatMessage.getMessage());
+
+        String recipient = null;
+        Matcher tobMatcher = TOB_UNIQUE_REGEX.matcher(message);
+        Matcher toaMatcher = TOA_UNIQUE_REGEX.matcher(message);
+        if (tobMatcher.matches()) {
+            recipient = tobMatcher.group(1);
+        } else if (toaMatcher.matches()) {
+            recipient = toaMatcher.group(1);
+        } else if (isInChambersOfXeric()) {
+            Matcher coxMatcher = COX_UNIQUE_REGEX.matcher(message);
+            if (coxMatcher.matches())
+                recipient = coxMatcher.group(1);
+        }
+
+        if (recipient == null)
+            return false;
+
+        if (config.announceRaidUniqueForSomeoneElse() && !isLocalPlayer(recipient)) {
+            cEngineer.sendChatIfEnabled("Purple, but not for me.");
+            soundEngine.playClip(Sound.RAID_UNIQUE_FOR_SOMEONE_ELSE, executor);
+        }
+        return true;
+    }
+
+    private boolean isLocalPlayer(String playerName) {
+        Player localPlayer = client.getLocalPlayer();
+        if (localPlayer == null || localPlayer.getName() == null)
+            return false;
+
+        return Text.standardize(localPlayer.getName()).equals(Text.standardize(playerName));
     }
 
     @Subscribe

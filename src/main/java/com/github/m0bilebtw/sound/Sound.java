@@ -21,6 +21,7 @@ public enum Sound {
     BRIMSTONE_KEY("brimstone_key_r1.wav"),
     BARROWS_NEVER_LUCKY("barrows_never_lucky_r1.wav"),
     SUPERIOR_FOE("superior_foe_r1.wav"),
+    RAID_UNIQUE_FOR_SOMEONE_ELSE("purple_not_for_me_r1.wav"),
     DEATH("DyingHCIMCompleted_r1.wav"),
     DEATH_TO_C_ENGINEER("Sit_r1.wav"),
 

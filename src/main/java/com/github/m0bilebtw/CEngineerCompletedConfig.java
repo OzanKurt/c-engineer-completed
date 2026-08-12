@@ -258,6 +258,17 @@ public interface CEngineerCompletedConfig extends Config {
         return true;
     }
 
+    @ConfigItem(
+            keyName = "announceRaidUniqueForSomeoneElse",
+            name = "Announce Someone Else's Raid Purple",
+            description = "Should C Engineer announce when a unique drops in your Chambers of Xeric, Theatre of Blood or Tombs of Amascut raid and it goes to someone else?",
+            section = SECTION_NON_ACHIEVEMENT_ANNOUNCEMENTS,
+            position = 30
+    )
+    default boolean announceRaidUniqueForSomeoneElse() {
+        return true;
+    }
+
     @ConfigSection(
             name = "General Announcement Settings",
             description = "Settings for other details when achievement sounds play.",
